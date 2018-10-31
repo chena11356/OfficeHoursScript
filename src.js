@@ -1,14 +1,13 @@
-//to be used with spreadsheet of Google Form responses
+/** BRONX SCIENCE NHS 2018 - FIRST TERM
+CREATED BY ALEX CHEN
+To be used to automatically generate Office Hours schedule based on responses. */
 
-function getNums(input){ //returns an array of the NUMBERS of the string input
+/** Gets array of numbers in string input. 
+@param {string} input
+*/
+function getNums(input){ 
   var res = [];
   var tempArr = [];
-  /*
-  for (var i = 0; i < input.length; i++){
-    if (input.charAt(i)=='1'||input.charAt(i)=='1'||input.charAt(i)=='1'||input.charAt(i)=='1'||){
-      res.push(parseInt(input.charAt(i))-1);
-    }
-  }*/
   if (input.indexOf(",")>=0){ //multiple periods available
     tempArr = input.split(",");
     for (var r = 0; r < tempArr.length; r++){
@@ -21,13 +20,21 @@ function getNums(input){ //returns an array of the NUMBERS of the string input
   return res;
 }
 
-function swap(input,m,n){ //swaps rows of indices m and n
+/** Swaps rows of indices m and n in array input.
+@param {Object[]} input
+@param {Number} m
+@param {Number} n
+*/
+function swap(input,m,n){ 
   var tempArr = input[m];
   input[m] = input[n];
   input[n] = tempArr;
 }
 
-function creditPreferenceSort(input){ //takes 2d array of people's indices, credits, and preferences; sort by credit, then location preference
+/** Sorts 2D input array of people's indices, credits, and preferences and sorts such that people who need credits are first, then by location preference.
+@param {Object[][]} input - 2D array of indices, credits, and location preferences.
+*/
+function creditPreferenceSort(input){ 
   //preference temporarily disabled because only library is available 1st term; guidance office will become available for tutoring 2nd term
   var newArr = []; //resulting array
   input = input.sort(function(a,b) { //sorts 2d aray by credits
@@ -56,6 +63,7 @@ function creditPreferenceSort(input){ //takes 2d array of people's indices, cred
   
 }
 
+/** Runs script to retrieve data and generate schedule. */
 function main() {
   var inputSheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0]; // Get sheet of form responses.
   // Get form input data as 2d array of people's emails, first names, last names, periods (Mon.-Fri.), and preference
@@ -249,7 +257,7 @@ function main() {
           }
         }
         
-        //EXTERMINATE THEM from availability for the rest of the day
+        //Remove them from availability for the rest of the day
         for (var z = 0; z < 5; z++){
             for (var y = 0; y < 10; y++){
               if (y==j){
@@ -266,7 +274,7 @@ function main() {
             }
           }
         
-        //if person has exceeded their preferred number of office hours, EXTERMINATE THEM from availability for the rest of the week
+        //if person has exceeded their preferred number of office hours,remove them from availability for the rest of the week
         if (values[tempPeriodSignup[k][0]][values[2].length-1]>=values[tempPeriodSignup[k][0]][values[2].length-3]){
           for (var z = 0; z < 5; z++){
             for (var y = 0; y < 10; y++){
@@ -282,7 +290,6 @@ function main() {
             }
           }
         }
-        //swap(tempPeriodSignup,k,tempPeriodSignup.length-1);
       }
       
       //guidance office currently not available, so this is disabled
