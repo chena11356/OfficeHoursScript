@@ -1,6 +1,7 @@
 /** BRONX SCIENCE NHS 2018 - FIRST TERM
 CREATED BY ALEX CHEN
-To be used to automatically generate Office Hours schedule based on responses. */
+To be used to automatically generate Office Hours schedule based on responses. 
+May be used as reference for future or aspiring NHS VPs of Tech.*/
 
 /** Gets array of numbers in string input. 
 @param {string} input
