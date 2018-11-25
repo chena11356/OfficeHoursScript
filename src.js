@@ -1,7 +1,7 @@
-/** BRONX SCIENCE NHS 2018 - FIRST TERM
+/** BRONX SCIENCE NHS 2018
 CREATED BY ALEX CHEN
 To be used to automatically generate Office Hours schedule based on responses. 
-May be used as reference for future or aspiring NHS VPs of Tech.*/
+May be used as reference for future NHS VPs of Tech.*/
 
 /** Gets array of numbers in string input. 
 @param {string} input
@@ -35,33 +35,16 @@ function swap(input,m,n){
 /** Sorts 2D input array of people's indices, credits, and preferences and sorts such that people who need credits are first, then by location preference.
 @param {Object[][]} input - 2D array of indices, credits, and location preferences.
 */
-function creditPreferenceSort(input){ 
-  //preference temporarily disabled because only library is available 1st term; guidance office will become available for tutoring 2nd term
-  var newArr = []; //resulting array
+function creditPreferenceSort(input){
+  //first sort by preference
+  input = input.sort(function(a,b) {
+    return a[2] - b[2];
+  });
+  
+  //then sort by credit
   input = input.sort(function(a,b) { //sorts 2d aray by credits
     return a[1] - b[1];
   });
-  
-  /*for (var m = 0; m < input.length; m++){ //first sort credits
-    tempArr.push(input[m][1]);
-  }*/
-  
-  /*
-  //then account for preferences by swapping rows if they have same credits, left row is L, and right row is G
-  for (var m = 0; m < input.length; m++){
-    for (var n = 1; n < input.length; n++){
-      if (n<=m){
-        continue;
-      }
-      if (input[m][1]==input[n][1]&&input[m][2].indexOf("ibrary")>=0&&input[n][2].indexOf("uidance")>=0){
-        //swap IF same credits, top row is library, and bottom row is guidance
-        swap(input,m,n);
-      }
-    }
-  }
-  */
-  
-  
 }
 
 /** Runs script to retrieve data and generate schedule. */
@@ -109,7 +92,7 @@ function main() {
       break;
     }
     if (i==juniorCredits[0].length-1){
-      Logger.log('Could not find JUNIORINDEX.');
+      Logger.log("Could not find JUNIORINDEX.");
     }
   }
   for (var i = 0; i < seniorCredits[0].length; i++){ // Iterate through the FIRST ROW and check which row has the word "tutoring"
@@ -118,14 +101,14 @@ function main() {
       break;
     }
     if (i==seniorCredits[0].length-1){
-      Logger.log('Could not find SENIORINDEX.');
+      Logger.log("Could not find SENIORINDEX.");
     }
   }
   if (JUNIORINDEX==-1){
-    Logger.log('JUNIORINDEX was not found.');
+    Logger.log("JUNIORINDEX was not found.");
   }
   if (SENIORINDEX==-1){
-    Logger.log('SENIORINDEX was not found.');
+    Logger.log("SENIORINDEX was not found.");
   }
   
   var tempCredits = -1;
@@ -150,16 +133,31 @@ function main() {
   var tempAvailability = []; //1d temp array of person's periods free on a particular day
   var tempDay = -1; 
   var tempPeriodSwitch = []; //temp array when adjusting person's place in queue for other days of same period
+  var tempPreference = "library";
   
   // Iterate through all the input values and add credits variable; also fill 3d array of indices of each person available for specific days 
   for (var i = values.length-1; i >= 1; i--){
     tempCredits = -1; 
     tempEmail = values[i][1].trim().toLowerCase();
+    
+    //tempPreference is 0 if library, 1 if no preference, and 2 if guidance
+    if (values[i][10].trim().toLowerCase().indexOf("ibrary")>=0){
+      tempPreference = 0;
+    }
+    else if (values[i][10].trim().toLowerCase().indexOf("preference")>=0){
+      tempPreference = 1;
+    }
+    else if (values[i][10].trim().toLowerCase().indexOf("uidance")>=0){
+      tempPreference = 2;
+    }
+    else{
+      Logger.log("Could not find tempPreference");
+    }
+    
     // Search for person in junior and senior spreadsheets to find their current tutoring credits
     for (var j = 2; j < juniorCredits.length; j++){
       if (juniorCredits[j][2].trim().toLowerCase().indexOf(tempEmail)>=0){
         tempCredits = juniorCredits[j][JUNIORINDEX];
-        //Logger.log('Found person in junior spreadsheet with index '+j+' and tempCredits '+tempCredits);
       }
     }
     
@@ -168,7 +166,6 @@ function main() {
       for (var j = 2; j < seniorCredits.length; j++){
         if (seniorCredits[j][2].trim().toLowerCase().indexOf(tempEmail)>=0){
           tempCredits = seniorCredits[j][SENIORINDEX];
-          //Logger.log('Found person in senior spreadsheet with index '+j+' and tempCredits '+tempCredits);
         }
       }
     }
@@ -208,7 +205,7 @@ function main() {
         continue;
       }
       for (var k = 0; k < tempAvailability.length; k++){ //change availability for each period
-        availability[tempDay][tempAvailability[k]-1].push([parseInt(i),tempCredits]); //add person's index, credits
+        availability[tempDay][tempAvailability[k]-1].push([parseInt(i),tempCredits, tempPreference]); //add person's index, credits, preference
       }
     }
     
@@ -252,7 +249,6 @@ function main() {
           //search for person's index in tempPeriodSwitch array
           for (var y = 0; y < tempPeriodSwitch.length; y++){
             if (tempPeriodSwitch[y][0]==tempPeriodSignup[k][0]){ //found them
-              //swap(tempPeriodSwitch,y,tempPeriodSwitch.length-1);
               tempPeriodSwitch.push(tempPeriodSwitch.splice(y, 1)[0]); //move them to the back
             }
           }
@@ -275,7 +271,7 @@ function main() {
             }
           }
         
-        //if person has exceeded their preferred number of office hours,remove them from availability for the rest of the week
+        //if person has exceeded their preferred number of office hours, remove them from availability for the rest of the week
         if (values[tempPeriodSignup[k][0]][values[2].length-1]>=values[tempPeriodSignup[k][0]][values[2].length-3]){
           for (var z = 0; z < 5; z++){
             for (var y = 0; y < 10; y++){
@@ -293,8 +289,7 @@ function main() {
         }
       }
       
-      //guidance office currently not available, so this is disabled
-      /*
+      
       //if there's more people (as in, more than 4 in the array), add to guidance also
       if (tempPeriodSignup.length>4){
         for (var k = 4; k < tempPeriodSignup.length; k++){
@@ -313,13 +308,12 @@ function main() {
             //search for person's index in tempPeriodSwitch array
             for (var y = 0; y < tempPeriodSwitch.length; y++){
               if (tempPeriodSwitch[y][0]==tempPeriodSignup[k][0]){ //found them
-                //swap(tempPeriodSwitch,y,tempPeriodSwitch.length-1);
                 tempPeriodSwitch.push(tempPeriodSwitch.splice(y, 1)[0]); //move them to the back
               }
             }
           }
         
-          //if person has exceeded their preferred number of office hours, EXTERMINATE THEM from availability
+          //if person has exceeded their preferred number of office hours, remove them from availability
           if (values[tempPeriodSignup[k][0]][values[2].length-1]>=values[tempPeriodSignup[k][0]][values[2].length-3]){
             for (var z = 0; z < 5; z++){
               for (var y = 0; y < 10; y++){
@@ -337,13 +331,8 @@ function main() {
           }
         }
       }
-      */
     }
   }
-  
-  
 }
-
-function main(){ OfficeHoursScript.main(); }
 
 
